@@ -102,7 +102,7 @@ func (z *Zabbix) ScreenshotALL() {
 
 	//tr tdで位置を特定
 
-	screenimages := make([]*screenimage, 0)
+	screenimages := make([][]*screenimage, 0)
 	for i := 0; i < trcount; i++ {
 		ff := z.Page.FindByClass("screen_view").All("tr").At(i).AllByClass("flickerfreescreen")
 		ffcount, err := ff.Count()
@@ -116,51 +116,53 @@ func (z *Zabbix) ScreenshotALL() {
 			if err != nil {
 				log.Fatal("Failed to src\n", err)
 			}
-			screenimages = append(screenimages, s)
+			screenimages[i] = append(screenimages[i], s)
 		}
 	}
 
-	for k, v := range screenimages {
-		fmt.Printf("screenimages:%v\n", v)
+	allb := new(bytes.Buffer)
+	for i, ss := range screenimages {
+		sb := new(bytes.Buffer)
+		for k, v := range ss {
+			fmt.Printf("screenimages:%v\n", v)
 
-		err := z.Page.Navigate(v.src)
-		if err != nil {
-			log.Fatalf("Failed to navigate:%v", err)
-		}
-		time.Sleep(5 * time.Second)
-		i := z.Page.Find("img")
-		body_ele, _ := i.Elements()
-		w, h, err := body_ele[0].GetSize()
-		if err != nil {
-			log.Fatalf("Failed to element:%v", err)
-		}
-		fmt.Printf("size:width %d,heigh %d¥n", w, h)
-		z.Page.Size(w, h)
-		b, err := z.Page.Session().GetScreenshot()
-		if err != nil {
-			log.Fatalf("Failed to getscreen:%v", err)
-		}
-		v.reader = bytes.NewReader(b)
-
-		z.Page.Screenshot(fmt.Sprintf("/tmp/outputs/zabbix00%d.png", k))
-		//	z.Screenshot(fmt.Sprintf("/tmp/outputs/zabbix000%d.png", k))
-	}
-
-	//scrrenshotで[]byteからreader生成して、直接imageデコード
-	//各画像の場所を覚えておいて、配置する
-	//スクリーンの画像用のstruct作って、そのスライスで（そこに配列位置サイズもセットして）
-	//	concati()
-
-	concatinate(screenimages[0].reader, screenimages[1].reader)
-	// まず横に結合して、それから縦に結合かな
-	/*
-		for i:= 0; i < tatenum;i++{
-			for j:=0;j < yokonum;j++{
-				横結合
+			err := z.Page.Navigate(v.src)
+			if err != nil {
+				log.Fatalf("Failed to navigate:%v", err)
 			}
-			横結合したものを縦結合
+			time.Sleep(5 * time.Second)
+			i := z.Page.Find("img")
+			body_ele, _ := i.Elements()
+			w, h, err := body_ele[0].GetSize()
+			if err != nil {
+				log.Fatalf("Failed to element:%v", err)
+			}
+			fmt.Printf("size:width %d,heigh %d¥n", w, h)
+			z.Page.Size(w, h)
+			b, err := z.Page.Session().GetScreenshot()
+			if err != nil {
+				log.Fatalf("Failed to getscreen:%v", err)
+			}
+			v.reader = bytes.NewReader(b)
+			if k == 0 {
+				io.Copy(b, v.reader)
+				continue
+			}
+			sb, _ = concatenateSideways(sb, v.reader)
+
+			z.Page.Screenshot(fmt.Sprintf("/tmp/outputs/zabbix00%d.png", k))
+			//	z.Screenshot(fmt.Sprintf("/tmp/outputs/zabbix000%d.png", k))
 		}
-	*/
+		if i == 0 {
+			io.Copy(allb, sb)
+		} else {
+			allb, _ = concatenateVertically(allb, sb)
+
+		}
+	}
+
+	file, _ := os.Create("output4.png")
+	io.Copy(file, allb)
 
 }
 
