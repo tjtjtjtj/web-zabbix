@@ -14,11 +14,11 @@ func concatenateSideways(r1, r2 io.Reader) (*bytes.Buffer, error) {
 
 	img1, fm1, err := image.Decode(r1)
 	if err != nil {
-		log.Fatalf("image decode err dayo %v", err)
+		log.Fatalf("image decode err dayo1 %v", err)
 	}
 	img2, fm2, err := image.Decode(r2)
 	if err != nil {
-		log.Fatalf("image decode err dayo %v", err)
+		log.Fatalf("image decode err dayo2 %v", err)
 	}
 
 	fmt.Printf("format:%s\n", fm1)
@@ -62,11 +62,11 @@ func concatenateVertically(r1, r2 io.Reader) (*bytes.Buffer, error) {
 
 	img1, fm1, err := image.Decode(r1)
 	if err != nil {
-		log.Fatalf("image decode err dayo %v", err)
+		log.Fatalf("image decode err dayo3 %v", err)
 	}
 	img2, fm2, err := image.Decode(r2)
 	if err != nil {
-		log.Fatalf("image decode err dayo %v", err)
+		log.Fatalf("image decode err dayo4 %v", err)
 	}
 
 	fmt.Printf("format:%s\n", fm1)
@@ -84,7 +84,7 @@ func concatenateVertically(r1, r2 io.Reader) (*bytes.Buffer, error) {
 
 	//rectangle for the big image
 	var rt image.Rectangle
-	if img1.Bounds().Dy() < rt2.Dx() {
+	if img1.Bounds().Dx() < rt2.Dx() {
 		rt = image.Rectangle{image.Point{0, 0}, rt2.Max}
 	} else {
 		rt = image.Rectangle{image.Point{0, 0}, image.Point{img1.Bounds().Dx(), rt2.Max.Y}}

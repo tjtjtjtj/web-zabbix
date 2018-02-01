@@ -109,6 +109,11 @@ func (z *Zabbix) ScreenshotALL() {
 		if err != nil {
 			log.Fatal("Failed to count", err)
 		}
+		if ffcount == 0 {
+			continue
+		}
+		fmt.Println("kkkkkkkkkkkkkkkokoni nnn")
+		screenimages = append(screenimages, make([]*screenimage, 0))
 		for j := 0; j < ffcount; j++ {
 			s := new(screenimage)
 			s.y, s.x = i, j
@@ -116,12 +121,14 @@ func (z *Zabbix) ScreenshotALL() {
 			if err != nil {
 				log.Fatal("Failed to src\n", err)
 			}
+			fmt.Println("kokoni nnn")
 			screenimages[i] = append(screenimages[i], s)
 		}
 	}
 
 	allb := new(bytes.Buffer)
 	for i, ss := range screenimages {
+		fmt.Printf("aaaaaaaallb %d\n", i)
 		sb := new(bytes.Buffer)
 		for k, v := range ss {
 			fmt.Printf("screenimages:%v\n", v)
@@ -145,7 +152,7 @@ func (z *Zabbix) ScreenshotALL() {
 			}
 			v.reader = bytes.NewReader(b)
 			if k == 0 {
-				io.Copy(b, v.reader)
+				io.Copy(sb, v.reader)
 				continue
 			}
 			sb, _ = concatenateSideways(sb, v.reader)
@@ -161,7 +168,7 @@ func (z *Zabbix) ScreenshotALL() {
 		}
 	}
 
-	file, _ := os.Create("output4.png")
+	file, _ := os.Create("/tmp/outputs/output4.png")
 	io.Copy(file, allb)
 
 }
